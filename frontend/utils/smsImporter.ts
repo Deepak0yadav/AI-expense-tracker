@@ -86,18 +86,33 @@ export async function importBankSms(limit = 200): Promise<ParsedTxn[]> {
   });
 }
 
-export async function uploadTransactions(transactions: ParsedTxn[]) {
+export async function uploadTransactions(transactions: ParsedTxn[], email?: string) {
+  const results = [];
   for (const t of transactions) {
     try {
-      await fetch(`${API_BASE}/transaction`, {
+      const transactionWithEmail = {
+        ...t,
+        email: email // Include email if provided
+      };
+
+      const response = await fetch(`${API_BASE}/transaction`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(t),
+        body: JSON.stringify(transactionWithEmail),
       });
-    } catch {
-      // ignore individual failures
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      results.push(result);
+    } catch (error) {
+      console.error('Failed to upload transaction:', error);
+      throw error; // Propagate error to caller
     }
   }
+  return results;
 }
 
 function looksLikeBankSender(addr: string) {
