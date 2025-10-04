@@ -1,6 +1,5 @@
 import express from "express";
 import { createTransaction } from "../controllers/transaction.js";
-import { createTransaction } from "../controllers/transaction.js";
 import { getSummary } from "../controllers/summary.js";
 
 const route = express.Router();

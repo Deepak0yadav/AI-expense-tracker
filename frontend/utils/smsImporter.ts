@@ -12,7 +12,7 @@ export type ParsedTxn = {
   mode: string; // UPI | Card | Bank
 };
 
-const HOST_DEFAULT = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000';
+const HOST_DEFAULT = Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
 const API_BASE = process.env.EXPO_PUBLIC_API_BASE || `${HOST_DEFAULT}/api/users`;
 
 export async function importBankSms(limit = 200): Promise<ParsedTxn[]> {
@@ -95,7 +95,8 @@ export async function uploadTransactions(transactions: ParsedTxn[], email?: stri
         email: email // Include email if provided
       };
 
-      const response = await fetch(`${API_BASE}/transaction`, {
+      const url = `${API_BASE}/transaction`;
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(transactionWithEmail),
@@ -109,6 +110,13 @@ export async function uploadTransactions(transactions: ParsedTxn[], email?: stri
       results.push(result);
     } catch (error) {
       console.error('Failed to upload transaction:', error);
+      // Helpful guidance for common connectivity issues
+      if ((error as Error)?.message?.includes('Network request failed')) {
+        Alert.alert(
+          'Upload failed',
+          `Could not reach backend at:\n${API_BASE}\n\nTips:\n• If you are on Android Emulator: ensure backend runs on your PC and use 10.0.2.2:3000 (we default to that).\n• If you are on a physical device: set EXPO_PUBLIC_API_BASE to http://<your-PC-LAN-IP>:3000/api/users and reload the app.\n• Backend must be running (npm run dev) and accessible.`,
+        );
+      }
       throw error; // Propagate error to caller
     }
   }
