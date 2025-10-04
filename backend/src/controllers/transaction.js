@@ -2,24 +2,10 @@ import TransactionModel from "../models/TransactionModel.js";
 import { categorizeTransaction } from "../utils/categorization.js";
 import { sendEmailNotification } from "../utils/emailNotification.js";
 
-function quickCategorize(amount, merchant = "", description = "") {
-      const text = `${merchant} ${description}`.toLowerCase();
-      if (amount < 0) {
-            if (/\b(zomato|swiggy|restaurant|food|cafe|domino|pizza|burger)\b/.test(text)) return { category: "Food", confidence: 70 };
-            if (/\b(uber|ola|fuel|petrol|diesel|flight|train|hotel|travel|bus|cab)\b/.test(text)) return { category: "Travel", confidence: 70 };
-            if (/\b(amazon|flipkart|myntra|shopping|store|mall|purchase)\b/.test(text)) return { category: "Shopping", confidence: 65 };
-            if (/\b(bill|electricity|water|dth|recharge|rent|emi)\b/.test(text)) return { category: "Bills", confidence: 65 };
-      } else {
-            if (/\b(salary|credit|refund|payout|reimbursement|income)\b/.test(text)) return { category: "Income", confidence: 70 };
-            if (/\b(dividend|interest|investment)\b/.test(text)) return { category: "Investments", confidence: 60 };
-      }
-      return { category: "Uncategorized", confidence: 50 };
-}
-
 export const createTransaction = async (req, res) => {
       try {
             const { amount, merchant, description, mode, email } = req.body;
-            const skipAI = String(req.query.skipAI || "").toLowerCase() === "true";
+            // AI usage is now automatic: heuristics first, AI only if needed.
 
             // Validate email if provided
             if (email) {
@@ -32,12 +18,8 @@ export const createTransaction = async (req, res) => {
                   }
             }
 
-            let category, confidence;
-            if (skipAI) {
-                  ({ category, confidence } = quickCategorize(Number(amount), merchant, description));
-            } else {
-                  ({ category, confidence } = await categorizeTransaction(merchant, description));
-            }
+            // Categorization: heuristics first; AI only if heuristics return "Other" and API key exists
+            const { category, confidence } = await categorizeTransaction(merchant, description);
 
             const transaction = new TransactionModel({
                   amount,
