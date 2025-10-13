@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, Download } from "lucide-react";
 
 const Hero = () => {
   const scrollToDownload = () => {
@@ -44,7 +44,10 @@ const Hero = () => {
             onClick={scrollToDownload}
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg rounded-full glow-primary transition-all hover:scale-105"
           >
-            Download App
+            <span className="flex items-center gap-2">
+              Download App
+              <Download className="w-5 h-5" />
+            </span>
           </Button>
           <Button 
             size="lg"
@@ -54,11 +57,6 @@ const Hero = () => {
           >
             Learn More
           </Button>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-          <ArrowDown className="w-6 h-6 text-muted-foreground animate-bounce" />
         </div>
       </div>
     </section>
