@@ -7,13 +7,13 @@ const Hero = () => {
   };
 
   return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden px-4">
+    <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden px-4">
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-card" />
       
       {/* Glowing orbs */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/30 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-float [animation-delay:2s]" />
       
       <div className="relative z-10 text-center max-w-4xl mx-auto animate-fade-in">
         {/* Logo/Badge */}
