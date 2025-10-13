@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Download as DownloadIcon, Smartphone } from "lucide-react";
-import screenshot1 from "@/assets/app-screenshot-1.png";
-import screenshot2 from "@/assets/app-screenshot-2.png";
+import screenshot1 from "../assets/app-screenshot-1.png";
+import screenshot2 from "../assets/app-screenshot-2.png";
 
 const Download = () => {
   return (
