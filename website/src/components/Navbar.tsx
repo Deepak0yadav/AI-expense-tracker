@@ -19,6 +19,7 @@ const Navbar = () => {
     { name: "Home", href: "#home", icon: null },
     { name: "Features", href: "#features", icon: Star },
     { name: "Download", href: "#download", icon: Smartphone },
+    { name: "FAQ", href: "/faq", icon: null },
     { name: "Contact", href: "#contact", icon: Mail },
   ];
 
@@ -64,7 +65,11 @@ const Navbar = () => {
               {navLinks.map((link) => (
                 <button
                   key={link.name}
-                  onClick={() => scrollToSection(link.href)}
+                  onClick={() =>
+                    link.href.startsWith("#")
+                      ? scrollToSection(link.href)
+                      : (window.location.href = link.href)
+                  }
                   className="text-muted-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10"
                 >
                   {link.name}
@@ -122,7 +127,11 @@ const Navbar = () => {
                       {navLinks.map((link) => (
                         <button
                           key={link.name}
-                          onClick={() => scrollToSection(link.href)}
+                          onClick={() =>
+                            link.href.startsWith("#")
+                              ? scrollToSection(link.href)
+                              : (window.location.href = link.href)
+                          }
                           className="w-full flex items-center gap-3 text-left px-4 py-3 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                         >
                           {link.icon && <link.icon className="w-5 h-5" />}
