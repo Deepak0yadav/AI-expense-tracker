@@ -1,10 +1,6 @@
 import { PermissionsAndroid, Platform, Alert } from 'react-native';
 import { auth } from '@/services/firebase';
 
-// Lazy require keeps iOS/web builds safe
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const SmsAndroid: any = Platform.OS === 'android' ? require('react-native-get-sms-android') : null;
-
 export type ParsedTxn = {
   amount: number; // negative for expense, positive for income
   merchant: string;
@@ -18,7 +14,12 @@ const API_BASE = process.env.EXPO_PUBLIC_API_BASE || `${HOST_DEFAULT}/api/users`
 
 export async function importBankSms(limit = 200): Promise<ParsedTxn[]> {
   if (Platform.OS !== 'android') return [];
-  if (!SmsAndroid || typeof SmsAndroid.list !== 'function') {
+  // Require the native module only when actually used, and tolerate Expo Go
+  let SmsAndroid: any = null;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    SmsAndroid = require('react-native-get-sms-android');
+  } catch {
     if (__DEV__) {
       // eslint-disable-next-line no-console
       console.warn('[smsImporter] Native SMS module not available. You must run a Dev Build (expo run:android), not Expo Go.');
@@ -29,6 +30,7 @@ export async function importBankSms(limit = 200): Promise<ParsedTxn[]> {
     );
     return [];
   }
+  if (!SmsAndroid || typeof SmsAndroid.list !== 'function') return [];
 
   const granted = await PermissionsAndroid.request(
     PermissionsAndroid.PERMISSIONS.READ_SMS,
