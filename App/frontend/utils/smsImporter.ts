@@ -1,4 +1,5 @@
 import { PermissionsAndroid, Platform, Alert } from 'react-native';
+import { auth } from '@/services/firebase';
 
 // Lazy require keeps iOS/web builds safe
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -96,9 +97,16 @@ export async function uploadTransactions(transactions: ParsedTxn[], email?: stri
       };
 
       const url = `${API_BASE}/transaction`;
+      let token: string | null = null;
+      try {
+        token = await auth.currentUser?.getIdToken() ?? null;
+      } catch {}
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(transactionWithEmail),
       });
       

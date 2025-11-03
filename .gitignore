@@ -65,3 +65,5 @@ ios/Pods/
 # --- Archives ---
 *.tgz
 *.zip
+
+google-services.json
