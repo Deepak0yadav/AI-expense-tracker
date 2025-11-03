@@ -33,38 +33,7 @@ function RootNavigator() {
     }
   }, [user, initializing, segments]);
 
-  // Request SMS permissions on Android as soon as the app opens
-  useEffect(() => {
-    if (Platform.OS !== 'android') return;
-
-    const requestSmsPermissions = async () => {
-      try {
-        const result = await PermissionsAndroid.requestMultiple([
-          PermissionsAndroid.PERMISSIONS.READ_SMS,
-          PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
-        ]);
-
-        const readGranted =
-          result[PermissionsAndroid.PERMISSIONS.READ_SMS] === PermissionsAndroid.RESULTS.GRANTED;
-        const receiveGranted =
-          result[PermissionsAndroid.PERMISSIONS.RECEIVE_SMS] === PermissionsAndroid.RESULTS.GRANTED;
-
-        if (!readGranted) {
-          Alert.alert(
-            'Permission required',
-            'To import bank SMS, please allow SMS permission in Settings > Apps > Permissions.',
-          );
-        }
-
-        // It's okay if RECEIVE_SMS is denied; importing from inbox only needs READ_SMS.
-      } catch (e) {
-        // Non-fatal: continue app startup even if we fail to request
-        console.warn('Failed to request SMS permissions', e);
-      }
-    };
-
-    requestSmsPermissions();
-  }, []);
+  // (Removed duplicate SMS permission request; handled in RootLayout below)
 
   if (initializing) {
     return null; // Optionally render a splash/loading screen
@@ -85,7 +54,7 @@ function RootNavigator() {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
-  // Request SMS permissions on Android as soon as the app opens
+  // Request SMS permissions on Android as soon as the app opens (READ_SMS only)
   useEffect(() => {
     if (Platform.OS !== 'android') return;
 
@@ -93,13 +62,10 @@ export default function RootLayout() {
       try {
         const result = await PermissionsAndroid.requestMultiple([
           PermissionsAndroid.PERMISSIONS.READ_SMS,
-          PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
         ]);
 
         const readGranted =
           result[PermissionsAndroid.PERMISSIONS.READ_SMS] === PermissionsAndroid.RESULTS.GRANTED;
-        const receiveGranted =
-          result[PermissionsAndroid.PERMISSIONS.RECEIVE_SMS] === PermissionsAndroid.RESULTS.GRANTED;
 
         if (!readGranted) {
           Alert.alert(
@@ -108,7 +74,7 @@ export default function RootLayout() {
           );
         }
 
-        // It's okay if RECEIVE_SMS is denied; importing from inbox only needs READ_SMS.
+        // Importing from inbox only needs READ_SMS.
       } catch (e) {
         // Non-fatal: continue app startup even if we fail to request
         console.warn('Failed to request SMS permissions', e);
