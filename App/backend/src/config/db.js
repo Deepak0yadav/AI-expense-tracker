@@ -5,10 +5,15 @@ dotenv.config();
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    // Support both names; prefer MONGO_URI (matches .env)
+    const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
+    if (!uri) {
+      console.error("❌ MongoDB connection error: MONGO_URI is not set in environment variables");
+      process.exit(1);
+      return;
+    }
+
+    const conn = await mongoose.connect(uri);
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {

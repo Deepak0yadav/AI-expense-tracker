@@ -7,7 +7,7 @@ import Download from "@/components/Download";
 import Contact from "@/components/Contact";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-// import Footer from "@/components/Footer";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   const location = useLocation();
@@ -41,7 +41,7 @@ const Index = () => {
   <Comparison />
       <Download />
       <Contact />
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 };
