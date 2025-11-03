@@ -72,21 +72,19 @@ export default function RegisterScreen() {
             </View>
 
             <View style={styles.form}>
-              {/* Google Sign-In Button (web only for now) */}
-              {Platform.OS === 'web' && (
-                <TouchableOpacity 
-                  style={[styles.button, styles.googleButton]} 
-                  disabled={submitting} 
-                  onPress={handleGoogleSignIn}
-                >
-                  <View style={styles.buttonContent}>
-                    <View style={styles.googleIconContainer}>
-                      <Text style={styles.googleIcon}>G</Text>
-                    </View>
-                    <Text style={styles.googleButtonText}>Continue with Google</Text>
+              {/* Google Sign-In Button */}
+              <TouchableOpacity 
+                style={[styles.button, styles.googleButton]} 
+                disabled={submitting} 
+                onPress={handleGoogleSignIn}
+              >
+                <View style={styles.buttonContent}>
+                  <View style={styles.googleIconContainer}>
+                    <Text style={styles.googleIcon}>G</Text>
                   </View>
-                </TouchableOpacity>
-              )}
+                  <Text style={styles.googleButtonText}>Continue with Google</Text>
+                </View>
+              </TouchableOpacity>
 
               <View style={styles.divider}>
                 <View style={styles.dividerLine} />

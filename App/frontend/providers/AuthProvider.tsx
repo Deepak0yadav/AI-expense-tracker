@@ -1,7 +1,12 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, User, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, User, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signInWithCredential } from 'firebase/auth';
 import { auth } from '@/services/firebase';
 import { Platform } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import * as AuthSession from 'expo-auth-session';
+
+// Ensure pending auth sessions are completed
+WebBrowser.maybeCompleteAuthSession();
 
 type AuthContextType = {
   user: User | null;
@@ -49,7 +54,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
     async signInWithGoogle() {
       const provider = new GoogleAuthProvider();
-      
       if (Platform.OS === 'web') {
         // Use popup on web for better UX
         try {
@@ -64,9 +68,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           throw error;
         }
       } else {
-        // For mobile, we'd use @react-native-google-signin/google-signin
-        // For now, throw error prompting user to use email/password
-        throw new Error('Google Sign-In on mobile requires additional setup. Please use email/password.');
+        // Native: Use Expo AuthSession to get an ID token and sign in to Firebase
+        const androidClientId = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
+        if (!androidClientId) {
+          throw new Error('Missing EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID in your env. See README for setup.');
+        }
+
+  const redirectUri = AuthSession.makeRedirectUri();
+        const discovery = {
+          authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+          tokenEndpoint: 'https://oauth2.googleapis.com/token',
+        } as const;
+
+        const request = new AuthSession.AuthRequest({
+          clientId: androidClientId,
+          redirectUri,
+          responseType: AuthSession.ResponseType.IdToken,
+          scopes: ['openid', 'profile', 'email'],
+          extraParams: {
+            // A random string for OIDC nonces; improves security
+            nonce: Math.random().toString(36).slice(2),
+          },
+        });
+
+        await request.makeAuthUrlAsync(discovery);
+  const result = await request.promptAsync(discovery);
+
+        if (result.type !== 'success') {
+          throw new Error(result.type === 'dismiss' ? 'Google Sign-In canceled' : 'Google Sign-In failed');
+        }
+
+        const idToken = result.params.id_token as string | undefined;
+        if (!idToken) throw new Error('No id_token received from Google');
+
+        const credential = GoogleAuthProvider.credential(idToken);
+        const credResult = await signInWithCredential(auth, credential);
+        return credResult.user;
       }
     },
     async signOutUser() {
